@@ -1,4 +1,6 @@
 android/app/src/main/AndroidManifest.xml
+android/google-services.json
+lib/firebase_options.dart
 
 # Miscellaneous
 *.class

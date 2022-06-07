@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "929227408443",
+    "project_id": "notesttracker",
+    "storage_bucket": "notesttracker.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:929227408443:android:493ce8d6dc8f27fce1481e",
+        "android_client_info": {
+          "package_name": "com.mkdev.notes_placer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "929227408443-gjmrovtjrtetsa8c49cbhblk75ouu718.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZMqmDm3uAX2fxFv7kIifHH8tGBFHXnCU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "929227408443-gjmrovtjrtetsa8c49cbhblk75ouu718.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
