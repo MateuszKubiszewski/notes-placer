@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -127,8 +128,13 @@ class _AddNoteTabState extends State<AddNoteTab> {
       }
     }
 
+    String creatorId = "";
+    if (FirebaseAuth.instance.currentUser?.uid != null) {
+      creatorId = FirebaseAuth.instance.currentUser!.uid;
+    }
+
     notesCollection.add({
-      "creatorId": "",
+      "creatorId": creatorId,
       "ownerId": "",
       "title": _formKey.currentState!.fields["title"]!.value.toString(),
       "text": _formKey.currentState!.fields["text"]!.value.toString(),

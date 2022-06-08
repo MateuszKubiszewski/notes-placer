@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/localization/l10n.dart';
+import 'package:notes_placer/collected_notes_tab.dart';
+import 'package:notes_placer/login_tab.dart';
 
 import 'add_note_tab.dart';
 import 'map_tab.dart';
@@ -50,16 +53,45 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  User? user;
+  bool authTabsVisible = true;
+  bool logoutVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      setState(() {
+        this.user = user;
+        authTabsVisible = user == null;
+        logoutVisible = user != null;
+      });
+    });
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MapTab(
-      androidDrawer: _AndroidDrawer(),
+      androidDrawer: _AndroidDrawer(user: user, authTabsVisible: authTabsVisible, logoutVisible: logoutVisible),
       maximalDistance: NotesPlacerApp.maximalDistance,
     );
   }
 }
 
 class _AndroidDrawer extends StatelessWidget {
+  const _AndroidDrawer({required this.user, required this.authTabsVisible, required this.logoutVisible});
+
+  final User? user;
+  final bool authTabsVisible;
+  final bool logoutVisible;
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -90,22 +122,62 @@ class _AndroidDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push<void>(context, MaterialPageRoute(builder: (context) =>
-                const AddNoteTab(maximalDistance: NotesPlacerApp.maximalDistance,)));
+                const AddNoteTab(maximalDistance: NotesPlacerApp.maximalDistance)));
             },
           ),
+          Visibility(
+            visible: authTabsVisible,
+            child: ListTile(
+              leading: LoginTab.icon,
+              title: const Text(LoginTab.title),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push<void>(context, MaterialPageRoute(builder: (context) => const LoginTab()));
+              },
+            ),
+          ),
+          Visibility(
+            visible: logoutVisible,
+            child: ListTile(
+              leading: CollectedNotesTab.icon,
+              title: const Text(CollectedNotesTab.title),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push<void>(context, MaterialPageRoute(builder: (context) => CollectedNotesTab(user: user)));
+              },
+            ),
+          ),
+          Visibility(
+            visible: logoutVisible,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Divider(),
+            ),
+          ),
+          Visibility(
+            visible: logoutVisible,
+            child: ListTile(
+              leading: const Icon(Icons.lock),
+              title: const Text("Logout"),
+              onTap: () {
+                FirebaseAuth.instance.signOut();
+                Navigator.pop(context);
+              }
+            ),
+          )
           // Long drawer contents are often segmented.
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Divider(),
-          ),
-          ListTile(
-            leading: MapTab.icon,
-            title: const Text("Notes map DEBUG"),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push<void>(context, MaterialPageRoute(builder: (context) => const MapTab(maximalDistance: 50)));
-            },
-          ),
+          // const Padding(
+          //   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          //   child: Divider(),
+          // ),
+          // ListTile(
+          //   leading: MapTab.icon,
+          //   title: const Text("Notes map DEBUG"),
+          //   onTap: () {
+          //     Navigator.pop(context);
+          //     Navigator.push<void>(context, MaterialPageRoute(builder: (context) => const MapTab(maximalDistance: 50)));
+          //   },
+          // ),
         ],
       ),
     );

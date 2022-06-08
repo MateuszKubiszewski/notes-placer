@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
@@ -50,15 +51,11 @@ class _MapTabState extends State<MapTab> {
     }
 
     LocationData locationData = await location.getLocation();
-    // latitude = locationData.latitude == null ? MapTab.defaultLatitude : locationData.latitude!.toDouble();
-    // longitude = locationData.longitude == null ? MapTab.defaultLongitude : locationData.longitude!.toDouble();
     latitude = locationData.latitude?.toDouble();
     longitude = locationData.longitude?.toDouble();
     
     location.onLocationChanged.listen((LocationData currentLocation) async {
       setState(() {
-        // latitude = currentLocation.latitude == null ? MapTab.defaultLatitude : locationData.latitude!.toDouble();
-        // longitude = currentLocation.longitude == null ? MapTab.defaultLongitude : locationData.longitude!.toDouble();
         latitude = locationData.latitude?.toDouble();
         longitude = locationData.longitude?.toDouble();
       });
@@ -156,6 +153,24 @@ class _MapTabState extends State<MapTab> {
   }
 
   AlertDialog getNoteInformation(Note note, String noteId) {
+    if (FirebaseAuth.instance.currentUser != null && note.creatorId == FirebaseAuth.instance.currentUser!.uid) {
+      return AlertDialog(
+        title: Text(note.title),
+        content: Text(note.text),
+        actions: [
+          ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text("Close"))
+        ],
+      );
+    }
+    if (FirebaseAuth.instance.currentUser == null) {
+      return AlertDialog(
+        title: Text(note.title),
+        content: Text(note.text),
+        actions: [
+          ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text("Close"))
+        ],
+      );
+    }
     if (note.checkLatAndLongMaxDistance(latitude, longitude, widget.maximalDistance)) {
       return AlertDialog(
         title: Text(note.title),
@@ -169,7 +184,7 @@ class _MapTabState extends State<MapTab> {
     else {
       return AlertDialog(
         title: Text(note.title),
-        content: const Text("To view the contents of note you have to be near the note."),
+        content: const Text("To view the contents of a note you have to be near the note."),
         actions: [
           ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text("Close"))
         ],
@@ -180,7 +195,15 @@ class _MapTabState extends State<MapTab> {
   void onCollectPressed(Note note, String noteId) {
     final notesCollection = FirebaseFirestore.instance.collection("notes");
     final noteRef = notesCollection.doc(noteId);
-    noteRef.update({ "visible": false });
+
+    var currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      noteRef.update({ "ownerId": currentUser.uid, "visible": false });
+    }
+    else {
+      noteRef.update({ "visible": false });
+    }
+    
     Navigator.pop(context);
   }
 }
