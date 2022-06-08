@@ -162,7 +162,7 @@ class _MapTabState extends State<MapTab> {
         ],
       );
     }
-    if (FirebaseAuth.instance.currentUser == null) {
+    if (FirebaseAuth.instance.currentUser == null && note.checkLatAndLongMaxDistance(latitude, longitude, widget.maximalDistance)) {
       return AlertDialog(
         title: Text(note.title),
         content: Text(note.text),
